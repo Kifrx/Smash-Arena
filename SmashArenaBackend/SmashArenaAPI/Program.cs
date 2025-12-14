@@ -4,10 +4,6 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ==========================================
-// 1. DAFTARKAN SERVICE
-// ==========================================
-
 builder.Services.AddControllers().AddJsonOptions(x =>
    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
@@ -23,8 +19,6 @@ builder.Services.AddCors(options =>
         });
 });
 
-// --- PERBAIKAN 1: BACA CONNECTION STRING DARI ENV/DOCKER ---
-// Jangan hardcode localhost!
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
                        ?? "server=smash_db;user=root;password=rootpassword123;database=badminton_db";
 
@@ -38,31 +32,20 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// ==========================================
-// 2. ATUR PIPELINE
-// ==========================================
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Matikan HTTPS Redirection agar tidak loop di Cloudflare Flexible
-// app.UseHttpsRedirection(); 
-
 app.UseCors("BebasAkses");
-
-// --- PERBAIKAN 2: AKTIFKAN WEBSITE STATIS (HTML) ---
-app.UseDefaultFiles(); // Agar otomatis buka index.html
-app.UseStaticFiles();  // Agar bisa baca css/js/gambar
-// ---------------------------------------------------
+app.UseDefaultFiles(); 
+app.UseStaticFiles(); 
 
 app.UseAuthorization();
 
 app.MapControllers();
 
-// Fallback: Jika user buka alamat aneh, kembalikan ke index.html (SPA Style)
 app.MapFallbackToFile("index.html");
 
 app.Run();
