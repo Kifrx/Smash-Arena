@@ -32,6 +32,22 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var dbContext = services.GetRequiredService<BadmintonDbContext>();
+        // Perintah ini akan membuat database & tabel otomatis jika belum ada
+        dbContext.Database.EnsureCreated(); 
+        Console.WriteLine("✅ Database & Tabel berhasil dibuat/dipastikan ada!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Gagal membuat database: {ex.Message}");
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
