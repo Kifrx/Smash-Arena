@@ -266,7 +266,6 @@
           password: document.getElementById("regPassword").value,
           role: "User",
         };
-
         try {
           const response = await fetch(`${API_URL}/register`, {
             method: "POST",
