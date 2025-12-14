@@ -30,7 +30,7 @@ public partial class BadmintonDbContext : DbContext
         {
             entity.HasKey(e => e.BookingId).HasName("PRIMARY"); 
 
-            entity.ToTable("Booking");
+            entity.ToTable("booking");
 
             entity.HasIndex(e => e.CourtId, "Court_ID");
             entity.HasIndex(e => e.UserId, "User_ID");
@@ -89,7 +89,7 @@ public partial class BadmintonDbContext : DbContext
         {
             entity.HasKey(e => e.CourtId).HasName("PRIMARY");
 
-            entity.ToTable("Court");
+            entity.ToTable("court");
 
             entity.Property(e => e.CourtId)
                 .HasMaxLength(10)
@@ -121,7 +121,7 @@ public partial class BadmintonDbContext : DbContext
         {
             entity.HasKey(e => e.UserId).HasName("PRIMARY");
 
-            entity.ToTable("Users");
+            entity.ToTable("users");
 
             entity.Property(e => e.UserId)
                 .HasMaxLength(10)
