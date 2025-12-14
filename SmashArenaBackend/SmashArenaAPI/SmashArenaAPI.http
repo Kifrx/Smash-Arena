@@ -1,0 +1,6 @@
+@SmashArenaAPI_HostAddress = http://localhost:5279
+
+GET {{SmashArenaAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

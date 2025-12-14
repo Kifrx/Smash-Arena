@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Detail Lapangan - Smash Arena</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+      body {
+        background-color: #f8f9fa;
+        font-family: "Segoe UI", sans-serif;
+      }
+      .detail-img {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        border-radius: 15px;
+      }
+      .price-tag {
+        color: #198754;
+        font-weight: bold;
+        font-size: 1.5rem;
+      }
+
+      /* Style untuk tombol kalau disabled */
+      .btn-disabled-custom {
+        background-color: #dc3545 !important; /* Merah */
+        border-color: #dc3545 !important;
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-white shadow-sm mb-4">
+      <div class="container">
+        <a class="navbar-brand fw-bold text-success" href="index.html"
+          >🏸 Smash Arena</a
+        >
+      </div>
+    </nav>
+
+    <div class="container pb-5">
+      <a href="index.html" class="btn btn-outline-secondary mb-3"
+        >&larr; Back to Home</a
+      >
+
+      <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-success" role="status"></div>
+        <p>Loading detail...</p>
+      </div>
+
+      <div id="courtDetail" class="row g-4 d-none">
+        <div class="col-md-6">
+          <img
+            id="d_img"
+            src=""
+            class="detail-img shadow-sm"
+            alt="Court Image"
+            onerror="this.src='https://via.placeholder.com/400'"
+          />
+        </div>
+
+        <div class="col-md-6">
+          <div class="bg-white p-4 rounded-3 shadow-sm h-100">
+            <h2 id="d_name" class="fw-bold mb-3">Nama Court</h2>
+            <span class="badge bg-success mb-3">Available</span>
+            <p class="text-muted" id="d_desc">Deskripsi fasilitas dll.</p>
+            <hr />
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <span>Harga per Jam</span>
+              <span id="d_price" class="price-tag">Rp 0</span>
+            </div>
+
+            <div class="card bg-light border-0 p-3">
+              <h5 class="fw-bold mb-3">Atur Jadwal</h5>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Tanggal Main</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="bookingDate"
+                  onchange="checkAvailability()"
+                />
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label fw-bold">Jam Mulai</label>
+                <select
+                  class="form-select"
+                  id="bookingTime"
+                  onchange="checkAvailability()"
+                >
+                  <option value="08:00">08:00</option>
+                  <option value="09:00">09:00</option>
+                  <option value="10:00">10:00</option>
+                  <option value="11:00">11:00</option>
+                  <option value="12:00">12:00</option>
+                  <option value="13:00">13:00</option>
+                  <option value="14:00">14:00</option>
+                  <option value="15:00">15:00</option>
+                  <option value="16:00">16:00</option>
+                  <option value="17:00">17:00</option>
+                  <option value="18:00">18:00</option>
+                </select>
+                <small class="text-muted">*Durasi main otomatis 1 Jam</small>
+              </div>
+
+              <div
+                id="alertMessage"
+                class="alert alert-danger py-2 d-none mb-3 text-center"
+              >
+                <i class="fas fa-exclamation-circle"></i> Jam ini sudah penuh.
+                Pilih waktu lain.
+              </div>
+
+              <button
+                id="btnBooking"
+                onclick="prosesBooking()"
+                class="btn btn-success w-100 fw-bold py-3 fs-5"
+              >
+                🏸 Booking Sekarang
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const courtId = urlParams.get("id");
+
+      // 1. Detail Lapangan
+      async function fetchDetail() {
+        try {
+          const response = await fetch(
+            `http://localhost:5279/api/Courts/${courtId}`
+          );
+          if (!response.ok) {
+            window.location.href = "index.html";
+            return;
+          }
+          const court = await response.json();
+
+          document.getElementById("loading").classList.add("d-none");
+          document.getElementById("courtDetail").classList.remove("d-none");
+          document.getElementById("d_img").src = court.gambarUrl;
+          document.getElementById("d_name").innerText = court.namaCourt;
+          document.getElementById(
+            "d_desc"
+          ).innerText = `${court.jenisLantai} | Fasilitas: ${court.fasilitas}`;
+          document.getElementById("d_price").innerText =
+            "Rp " + court.hargaPerJam.toLocaleString();
+
+          document.getElementById("bookingDate").valueAsDate = new Date();
+
+          checkAvailability();
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      // 2. CEK KETERSEDIAAN
+      async function checkAvailability() {
+        const date = document.getElementById("bookingDate").value;
+        const time = document.getElementById("bookingTime").value;
+        const btn = document.getElementById("btnBooking");
+        const alertMsg = document.getElementById("alertMessage");
+
+        if (!date || !time) return;
+
+        btn.disabled = true;
+        btn.innerText = "Checking...";
+
+        try {
+          const response = await fetch(
+            `http://localhost:5279/api/Bookings/check?courtId=${courtId}&date=${date}`
+          );
+          const bookedSlots = await response.json();
+
+          //cek booking
+          if (bookedSlots.includes(time)) {
+            btn.disabled = true;
+            btn.classList.remove("btn-success");
+            btn.classList.add("btn-disabled-custom");
+            btn.innerHTML = '<i class="fas fa-lock"></i> Already Booked';
+
+            alertMsg.classList.remove("d-none");
+          } else {
+            btn.disabled = false;
+            btn.classList.add("btn-success");
+            btn.classList.remove("btn-disabled-custom");
+            btn.innerHTML = "🏸 Booking Sekarang";
+
+            alertMsg.classList.add("d-none");
+          }
+        } catch (error) {
+          console.error("Error check:", error);
+        }
+      }
+
+      // 3. Proses Booking
+      async function prosesBooking() {
+        const userDataString = localStorage.getItem("user_data");
+
+        if (!userDataString) {
+          Swal.fire({
+            title: "Ups, Belum Login!",
+            text: "Kamu harus login dulu untuk memesan lapangan ini.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#198754",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Login Sekarang",
+            cancelButtonText: "Nanti Saja",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = "login.html";
+            }
+          });
+          return;
+        }
+
+        const user = JSON.parse(userDataString);
+
+        const bookingData = {
+          userId: user.userId || user.User_ID || user.user_ID,
+          courtId: courtId,
+          tanggalMain: document.getElementById("bookingDate").value,
+          jamMulai: document.getElementById("bookingTime").value + ":00",
+        };
+
+        try {
+          const response = await fetch("http://localhost:5279/api/Bookings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bookingData),
+          });
+          const result = await response.json();
+
+          if (response.ok) {
+            Swal.fire({
+              title: "Booking Berhasil! 🎉",
+              text: "Kode Booking: " + result.bookingId,
+              icon: "success",
+              confirmButtonColor: "#198754",
+            }).then(() => {
+              window.location.href = "dashboard.html";
+            });
+          } else {
+            Swal.fire("Gagal Booking", result.message, "error");
+            checkAvailability();
+          }
+        } catch (error) {
+          Swal.fire("Error", "Gagal menghubungi server.", "error");
+        }
+      }
+
+      if (courtId) fetchDetail();
+      else window.location.href = "index.html";
+    </script>
+  </body>
+</html>

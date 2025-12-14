@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smash Arena - Booking Lapangan Badminton</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+      :root {
+        --primary-green: #198754;
+      }
+      body {
+        background-color: #f8f9fa;
+        font-family: "Segoe UI", sans-serif;
+      }
+      .hero-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+          url("https://images.unsplash.com/photo-1626224583764-84786c71971e?q=80&w=2070");
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 100px 0;
+        text-align: center;
+        border-radius: 0 0 20px 20px;
+      }
+      .court-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+      .court-card:hover {
+        transform: translateY(-10px);
+      }
+      .court-img {
+        height: 200px;
+        object-fit: cover;
+      }
+      .price-tag {
+        color: var(--primary-green);
+        font-weight: bold;
+        font-size: 1.2rem;
+      }
+      .navbar-brand {
+        font-weight: bold;
+        color: var(--primary-green) !important;
+        font-size: 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <nav
+      class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm"
+    >
+      <div class="container">
+        <a class="navbar-brand" href="#">🏸 Smash Arena</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse justify-content-end"
+          id="navbarNav"
+        >
+          <ul class="navbar-nav align-items-center gap-2">
+            <li class="nav-item">
+              <a class="nav-link active fw-bold" href="#">Home</a>
+            </li>
+
+            <div id="authSection" class="d-flex gap-2 ms-lg-3">
+              <a
+                href="login.html"
+                class="btn btn-outline-success rounded-pill px-4 fw-bold"
+                >Login</a
+              >
+            </div>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <header class="hero-section mb-5">
+      <div class="container">
+        <h1 class="display-4 fw-bold mb-3">Main Badminton Jadi Mudah</h1>
+        <p class="lead mb-4">
+          Booking lapangan favoritmu tanpa ribet, kapan saja dan di mana saja.
+        </p>
+        <a
+          href="#court-list"
+          class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow"
+          >Cari Lapangan</a
+        >
+      </div>
+    </header>
+
+    <div class="container pb-5" id="court-list">
+      <div class="text-center mb-5">
+        <h2 class="fw-bold">Pilihan Lapangan</h2>
+        <p class="text-muted">Pilih lapangan yang sesuai dengan gayamu</p>
+      </div>
+
+      <div class="row g-4" id="courtsContainer">
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-success" role="status"></div>
+          <p class="mt-2 text-muted">Memuat data lapangan...</p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="bg-dark text-white text-center py-4 mt-auto">
+      <div class="container">
+        <p class="mb-0">&copy; 2025 Smash Arena. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // 1. CEK STATUS LOGIN
+      function checkLoginStatus() {
+        const userData = localStorage.getItem("user_data");
+        const authSection = document.getElementById("authSection");
+
+        if (userData) {
+          const user = JSON.parse(userData);
+          const shortName = (
+            user.namaLengkap ||
+            user.nama_Lengkap ||
+            "User"
+          ).split(" ")[0];
+
+          const isAdmin = user.role === "Admin";
+          const targetLink = isAdmin ? "admin_home.html" : "dashboard.html";
+          const labelLink = isAdmin ? "Admin Panel" : "My Dashboard";
+          const btnClass = isAdmin ? "btn-dark" : "btn-success";
+
+          authSection.innerHTML = `
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="${targetLink}" class="btn ${btnClass} rounded-pill px-4 fw-bold shadow-sm">
+                            <i class="fas fa-columns me-2"></i>${labelLink}
+                        </a>
+
+                        <div class="vr mx-1"></div>
+
+                        <span class="fw-bold text-secondary">Hai, ${shortName}</span>
+
+                        <button onclick="logout()" class="btn btn-sm btn-outline-danger rounded-circle shadow-sm" title="Logout" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-power-off"></i>
+                        </button>
+                    </div>
+                `;
+        }
+      }
+
+      // 2. LOGOUT FUNCTION
+      function logout() {
+        Swal.fire({
+          title: "Yakin mau keluar?",
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          confirmButtonText: "Ya, Logout",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            localStorage.removeItem("user_data");
+            window.location.reload();
+          }
+        });
+      }
+
+      // 3. DATA LAPANGAN
+      async function fetchCourts() {
+        try {
+          const response = await fetch("http://localhost:5279/api/Courts");
+          const courts = await response.json();
+
+          const container = document.getElementById("courtsContainer");
+          container.innerHTML = "";
+
+          if (courts.length === 0) {
+            container.innerHTML =
+              '<div class="col-12 text-center text-muted">Belum ada lapangan tersedia.</div>';
+            return;
+          }
+
+          courts.forEach((c) => {
+            const id = c.courtId || c.CourtId;
+            const name = c.namaCourt || c.NamaCourt;
+            const price = c.hargaPerJam || c.HargaPerJam;
+            const img = c.gambarUrl || c.GambarUrl;
+            const floor = c.jenisLantai || c.JenisLantai;
+            const facilities = c.fasilitas || c.Fasilitas;
+
+            const html = `
+                    <div class="col-md-4">
+                        <div class="card court-card h-100">
+                            <img src="${img}" class="card-img-top court-img" alt="${name}" onerror="this.src='https://via.placeholder.com/400?text=No+Image'">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title fw-bold">${name}</h5>
+                                <p class="text-muted small mb-2"><i class="fas fa-layer-group me-1"></i> ${floor}</p>
+                                <p class="card-text small text-secondary mb-3">${facilities}</p>
+                                
+                                <div class="mt-auto d-flex justify-content-between align-items-center">
+                                    <span class="price-tag">Rp ${price.toLocaleString()}/Jam</span>
+                                    
+                                    <a href="detail.html?id=${id}" class="btn btn-success rounded-pill px-4 fw-bold">
+                                        Book Now
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            container.innerHTML += html;
+          });
+        } catch (error) {
+          console.error("Error:", error);
+          document.getElementById("courtsContainer").innerHTML =
+            '<div class="col-12 text-center text-danger">Gagal memuat data server.</div>';
+        }
+      }
+
+      checkLoginStatus();
+      fetchCourts();
+    </script>
+  </body>
+</html>
