@@ -48,7 +48,7 @@
 
 ## 📸 Screenshots
 
-|             Halaman Utama              |            Detail & Booking             |
+|             Dashboard User              |            Booking User                 |
 | :------------------------------------: | :-------------------------------------: |
 | ![Home Page](assets/Dashboarduser.png) | ![Booking Page](assets/Bookinguser.png) |
 
