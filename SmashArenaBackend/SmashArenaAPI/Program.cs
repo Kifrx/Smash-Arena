@@ -4,11 +4,14 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ==========================================
+// 1. DAFTARKAN SERVICE
+// ==========================================
 
 builder.Services.AddControllers().AddJsonOptions(x =>
    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-
+// CORS Config
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("BebasAkses",
@@ -20,19 +23,24 @@ builder.Services.AddCors(options =>
         });
 });
 
-// Database MySQL 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "server=smash_db;user=root;password=rootpassword123;database=badminton_db";
+// --- PERBAIKAN 1: BACA CONNECTION STRING DARI ENV/DOCKER ---
+// Jangan hardcode localhost!
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+                       ?? "server=smash_db;user=root;password=rootpassword123;database=badminton_db";
+
 var serverVersion = ServerVersion.AutoDetect(connectionString);
 
 builder.Services.AddDbContext<BadmintonDbContext>(options =>
     options.UseMySql(connectionString, serverVersion));
 
-// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// ==========================================
+// 2. ATUR PIPELINE
+// ==========================================
 
 if (app.Environment.IsDevelopment())
 {
@@ -40,18 +48,21 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Matikan HTTPS Redirection agar tidak loop di Cloudflare Flexible
+// app.UseHttpsRedirection(); 
 
-app.UseDefaultFiles(); 
-app.UseStaticFiles();
+app.UseCors("BebasAkses");
 
-
-app.UseCors("BebasAkses"); 
+// --- PERBAIKAN 2: AKTIFKAN WEBSITE STATIS (HTML) ---
+app.UseDefaultFiles(); // Agar otomatis buka index.html
+app.UseStaticFiles();  // Agar bisa baca css/js/gambar
+// ---------------------------------------------------
 
 app.UseAuthorization();
-app.UseDefaultFiles();
-app.UseStaticFiles();
 
 app.MapControllers();
 
-app.Run(); 
+// Fallback: Jika user buka alamat aneh, kembalikan ke index.html (SPA Style)
+app.MapFallbackToFile("index.html");
+
+app.Run();
