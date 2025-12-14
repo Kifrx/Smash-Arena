@@ -1,18 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using SmashArenaAPI.Models; 
-using System.Text.Json.Serialization; // <--- Wajib ada
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ==========================================
-// 1. DAFTARKAN SERVICE (Dapur)
-// ==========================================
 
-// Fix Circular Reference (Obat Pusing)
 builder.Services.AddControllers().AddJsonOptions(x =>
    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-// Konfigurasi CORS (Biar Frontend bisa masuk)
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("BebasAkses",
@@ -25,7 +21,7 @@ builder.Services.AddCors(options =>
 });
 
 // Database MySQL 
-var connectionString = "server=localhost;user=root;password=;database=badminton_db";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "server=smash_db;user=root;password=rootpassword123;database=badminton_db";
 var serverVersion = ServerVersion.AutoDetect(connectionString);
 
 builder.Services.AddDbContext<BadmintonDbContext>(options =>
@@ -37,9 +33,6 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// ==========================================
-// 2. ATUR PIPELINE (Pelayan)
-// ==========================================
 
 if (app.Environment.IsDevelopment())
 {
@@ -49,10 +42,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("BebasAkses"); // Pasang CORS
+app.UseDefaultFiles(); 
+app.UseStaticFiles();
+
+
+app.UseCors("BebasAkses"); 
 
 app.UseAuthorization();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.MapControllers();
 
-app.Run(); // <--- Cukup satu kali saja di paling akhir!
+app.Run(); 
