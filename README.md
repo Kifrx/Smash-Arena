@@ -50,8 +50,8 @@
 
 |             Halaman Utama              |            Detail & Booking             |
 | :------------------------------------: | :-------------------------------------: |
-| ![Home Page](assets/Dashboarduser.png) | ![Booking Page](assets/bookinguser.png) |
+| ![Home Page](assets/Dashboarduser.png) | ![Booking Page](assets/Bookinguser.png) |
 
-|             Dashboard Admin              |             Booing Admin              |
+|             Dashboard Admin              |             Booking Admin              |
 | :--------------------------------------: | :-----------------------------------: |
 | ![Admin Page](assets/DahsboardAdmin.png) | ![User Page](assets/bookingAdmin.png) |
